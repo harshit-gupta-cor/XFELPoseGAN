@@ -4,8 +4,8 @@ import sys
 import traceback
 import yaml
 
-sys.path.insert(0, "/sdf/home/h/hgupta/ondemand/XFELPoseGAN/")
-sys.path.insert(0, "/sdf/home/h/hgupta/ondemand/XFELPoseGAN/src/")
+sys.path.insert(0, os.getcwd())
+sys.path.insert(0, os.path.join(os.getcwd(), "src/"))
 from utils import Dict_to_Obj, update_config
 from wrapper import SupervisedXFELposeganWrapper
 from generate_data import GenerateData
