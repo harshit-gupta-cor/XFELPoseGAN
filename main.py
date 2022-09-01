@@ -81,8 +81,8 @@ def main():
     config = init_config()
     # dataset_generator=GenerateData(config)
     # dataset_generator.run()
-    supervised_cryoposegan_wrapper = SupervisedCryoposeganWrapper(config)
-    supervised_cryoposegan_wrapper.run()
+    wrapper = SupervisedXFELposeganWrapper(config)
+    wrapper.run()
     return 0, "Reconstruction completed."
 
 
