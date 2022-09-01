@@ -1,0 +1,132 @@
+  #dataset:
+    exp_name: xray_ewald
+    ewald_radius: 10000
+    simulated: True
+    algotype: train
+    device: "cuda:0"
+    datasetsize: 41000
+    snr_val: 20
+    lambdapenalty: 0.001
+    init_with_gt: False
+    down_res_in_pixel: 2
+    loss_mode: "matrix"
+    unet: False
+    protein: splice
+    train_num_workers: 32
+
+    #multires:
+    multires: True
+
+    cryogan_iteration: 5000
+    scale: [5]
+    sup_iteration_scale: [2000 ]
+    tomo_iteration_scale: [2000]
+
+
+    #strategy
+
+
+    symmetrized_loss_sup: 1
+    symmetrized_loss_tomo: 1
+    gaussian_pyramid: 0
+    num_octaves: 3
+    progressive_supervision: 0
+    use_3d_volume_encoder: 0
+    weigt_loss_mean_std: False
+
+
+
+    #forward model
+    normalize_gt: False
+    shift: False
+    ctf: False
+    flip_sign: False
+     
+    kv: 300
+    cs: 2.7
+    amplitude_contrast: 0.1
+    b_factor: 0
+    value_nyquist: 0.1
+
+  #scheduler
+    scheduler_step_size: 1000
+    scheduler_gamma: 0.98
+
+  #constraint
+    positivity: True
+    mask_3d: True
+    mask_3d_diameter: 0.9
+    mask_2d: False
+
+
+  #projector
+    gt_side_len: 32
+    rec_side_len: 32
+    ProjectionSize: 32
+    map_shape: 32
+    batch_size: 32
+    noise: True
+    weight_gen: 1
+
+
+  #optimization_gen:
+    gen_lr: 1e-3
+    gen_momentum: 0.5
+    gen_beta_1: 0.5
+    gen_beta_2: 0.9
+    gen_eps: 1e-8
+    gen_clip_grad: True
+    gen_clip_norm_value: 1000
+    gen_weight_decay: 0
+
+  #optimization_dis:
+    dis_iterations: 4
+    dis_optimizer: 'adam'
+    dis_lr: 1e-3
+    dis_beta_1: 0.5
+    dis_beta_2: 0.9
+    dis_eps: 1e-8
+    dis_clip_grad: True
+    dis_clip_norm_value: 1e8
+    dis_weight_decay: 0
+
+  #optimization_scalar:
+    scalar_optimizer: 'adam'
+    scalar_lr: 1e-2
+    scalar_beta_1: 0.5
+    scalar_beta_2: 0.99
+    scalar_eps: 1e-8
+    scalar_weight_decay: 0
+    scalar_clip_grad: True
+    scalar_clip_norm_value: 1e8
+
+  #optimization_encoder:
+    encoder_lr: 0.001
+    encoder_beta_1: 0.9
+    encoder_beta_2: 0.999
+    encoder_eps: 1e-8
+    encoder_clip_grad: True
+    encoder_clip_norm_value: 100
+    encoder_weight_decay: 0
+    factor_normalization: 10
+
+  #encoder_architecture:
+    encoder_type: "cryoposenet"
+    regressor_orientation_layers: [512, 256]
+    encoder_conv_layers: [64,128,256,512,1024]
+    encoder_batch_norm: True
+    encoder_max_pool: True
+    encoder_equalized_lr: True
+    orientation_dims: 6
+    last_nonlinearity: 'tanh'
+    so3_parameterization: "s2s2"
+    flip_images: False
+
+  #dis_architecture:
+    num_channel_Discriminator: 64
+    num_layer_Discriminator: 4 #int(np.log2(sidelen)-2) in the update_config
+    num_N_Discriminator: 128
+    FourierDiscriminator: False
+    leak_value: 0.1
+    normalize_dis_input: True
+
