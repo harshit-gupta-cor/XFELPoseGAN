@@ -11,7 +11,7 @@ from simulator_utils import LinearSimulator, XFELSimulator
 from projector_utils import ProjectorMultiRes, XFELMultiRes, EwaldProjector
 import matplotlib.pyplot as plt
 from transforms import half_so3, downsample_avgpool, primal_to_fourier_3D, downsample_avgpool_3D,downsample_fourier_crop_3D, fourier_to_primal_3D,fourier_to_primal_2D, vol_to_autocorr
-sys.path.insert(0, "/sdf/home/h/hgupta/ondemand/CryoPoseGAN/")
+sys.path.insert(0, "/sdf/home/h/hgupta/ondemand/XFELPoseGAN/")
 from utils import dict2cuda
 
 
@@ -121,12 +121,12 @@ def init_gt_generator(config):
 
         print("Protein is "+config.protein )
         if config.protein == "betagal" :
-            with mrcfile.open("/sdf/home/h/hgupta/ondemand/CryoPoseGAN/figs/GroundTruth_Betagal-256.mrc") as m:
+            with mrcfile.open("/sdf/home/h/hgupta/ondemand/XFELPoseGAN/figs/GroundTruth_Betagal-256.mrc") as m:
                 vol = torch.Tensor(m.data.copy()) / 10
 
 
         elif config.protein == "ribo": 
-            with mrcfile.open("/sdf/home/h/hgupta/ondemand/CryoPoseGAN/figs/80S.mrc") as m:
+            with mrcfile.open("/sdf/home/h/hgupta/ondemand/XFELPoseGAN/figs/80S.mrc") as m:
                 vol = torch.Tensor(m.data.copy()) / 1000
 
 
@@ -134,7 +134,7 @@ def init_gt_generator(config):
             vol = torch.Tensor(init_cube(L)) / 50
 
         elif config.protein == "splice":
-            with mrcfile.open("/sdf/home/h/hgupta/ondemand/CryoPoseGAN/figs/GroundTruth_Splice-128.mrc") as m:
+            with mrcfile.open("/sdf/home/h/hgupta/ondemand/XFELPoseGAN/figs/GroundTruth_Splice-128.mrc") as m:
                 vol = torch.Tensor(m.data.copy()) / 1e6
                 
 
@@ -144,7 +144,7 @@ def init_gt_generator(config):
         if config.gt_side_len != vol.shape[-1]:
             vol = downsample_fourier_crop_3D(vol.to(config.device), size=config.gt_side_len)
             
-            name="/sdf/home/h/hgupta/ondemand/CryoPoseGAN/figs/GroundTruth_"+config.protein+"_"+str(config.gt_side_len)+".mrc"
+            name="/sdf/home/h/hgupta/ondemand/XFELPoseGAN/figs/GroundTruth_"+config.protein+"_"+str(config.gt_side_len)+".mrc"
             with mrcfile.new(name, overwrite=True) as m:
                 m.set_data(vol.cpu().numpy())
 

@@ -4,10 +4,10 @@ import sys
 import traceback
 import yaml
 
-sys.path.insert(0, "/sdf/home/h/hgupta/ondemand/CryoPoseGAN/")
-sys.path.insert(0, "/sdf/home/h/hgupta/ondemand/CryoPoseGAN/src/")
+sys.path.insert(0, "/sdf/home/h/hgupta/ondemand/XFELPoseGAN/")
+sys.path.insert(0, "/sdf/home/h/hgupta/ondemand/XFELPoseGAN/src/")
 from utils import Dict_to_Obj, update_config
-from wrapper import SupervisedCryoposeganWrapper
+from wrapper import SupervisedXFELposeganWrapper
 from generate_data import GenerateData
 
 

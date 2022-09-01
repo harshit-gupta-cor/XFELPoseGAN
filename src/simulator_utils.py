@@ -8,7 +8,7 @@ from noise_utils import Noise
 from shift_utils import Shift
 from transforms import primal_to_fourier_2D, fourier_to_primal_2D, primal_to_fourier_3D, fourier_to_primal_3D
 import sys
-sys.path.insert(0, "/sdf/home/h/hgupta/ondemand/CryoPoseGAN/")
+sys.path.insert(0, "/sdf/home/h/hgupta/ondemand/XFELPoseGAN/")
 from ml_modules import Unet
 import numpy as np
 from src.projector_utils import ProjectorFactory

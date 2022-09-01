@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import mrcfile
-sys.path.insert(0, "/sdf/home/h/hgupta/ondemand/CryoPoseGAN/")
+sys.path.insert(0, "/sdf/home/h/hgupta/ondemand/XFELPoseGAN/")
 from utils import to_numpy
 from plot3d_utils import generate_rotmats_video
 from loss_utils import pairwise_cos_sim
