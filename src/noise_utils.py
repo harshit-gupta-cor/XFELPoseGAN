@@ -1,6 +1,6 @@
 """Module to corrupt the projection with noise."""
 import torch
-from transforms import downsample_avgpool
+from transforms import downsample_avgpool, add_poisson
 
 class Noise(torch.nn.Module):
     """Class to corrupt the projection with noise.
@@ -19,6 +19,15 @@ class Noise(torch.nn.Module):
         self.current_snr=100
         
         print("noise module sigma kept constant to 1")
+
+    def mask_square(self, proj):
+        mask=torch.ones_like(proj)
+        c=proj.shape[-1]//2
+        mask[:,:,c-4:c+4, :]=0
+        mask[:, :, :, c-4:c+4] = 0
+        mask[:,:,c-32:c+32, c-32:c+32]=0
+        return mask*proj
+
     def forward(self, proj, noise_params ):
         """Add noise to projections.
         Currently, only supports additive white gaussian noise.
@@ -48,8 +57,13 @@ class Noise(torch.nn.Module):
             else:
                 noise=noise_randn
         
-                    
-        out = proj + noise_sigma * noise
+        if self.config.noise_type=="poisson"   :
+            proj=proj/noise_sigma
+            out = add_poisson(proj)
+            out = self.mask_square(out)
+        else:
+            out = proj + noise_sigma * noise
+
         self.current_snr=self.snr_calculator(proj, out)
            
         return out

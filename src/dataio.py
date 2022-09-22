@@ -11,7 +11,7 @@ from simulator_utils import LinearSimulator, XFELSimulator
 from projector_utils import ProjectorMultiRes, XFELMultiRes, EwaldProjector
 import matplotlib.pyplot as plt
 from transforms import half_so3, downsample_avgpool, primal_to_fourier_3D, downsample_avgpool_3D,downsample_fourier_crop_3D, fourier_to_primal_3D,fourier_to_primal_2D, vol_to_autocorr
-sys.path.insert(0, "/sdf/home/h/hgupta/ondemand/XFELPoseGAN/")
+sys.path.insert(0, os.getcwd())
 from utils import dict2cuda
 
 
@@ -71,7 +71,7 @@ def get_shift_params(config, std=6):
 
 def dataloader( config):
     if config.simulated:
-        if "xsdfsdfray" in config.exp_name:
+        if "xsdfsdfray" in config.exp_name: #don't want to use this for now. Only for special cases.
             data_loader=  SimulatedXFELDataLoader(config)
             dataset=data_loader
             noise_loader=SimulatedXFELDataLoader(config, fake_params=True)
@@ -121,12 +121,14 @@ def init_gt_generator(config):
 
         print("Protein is "+config.protein )
         if config.protein == "betagal" :
-            with mrcfile.open("/sdf/home/h/hgupta/ondemand/XFELPoseGAN/figs/GroundTruth_Betagal-256.mrc") as m:
+            volume_path=os.path.join(os.getcwd(),"figs/GroundTruth_Betagal-256.mrc" )
+            with mrcfile.open(volume_path) as m:
                 vol = torch.Tensor(m.data.copy()) / 10
 
 
-        elif config.protein == "ribo": 
-            with mrcfile.open("/sdf/home/h/hgupta/ondemand/XFELPoseGAN/figs/80S.mrc") as m:
+        elif config.protein == "ribo":
+            volume_path=os.path.join(os.getcwd(),"figs/80S.mrc" )
+            with mrcfile.open(volume_path) as m:
                 vol = torch.Tensor(m.data.copy()) / 1000
 
 
@@ -134,7 +136,8 @@ def init_gt_generator(config):
             vol = torch.Tensor(init_cube(L)) / 50
 
         elif config.protein == "splice":
-            with mrcfile.open("/sdf/home/h/hgupta/ondemand/XFELPoseGAN/figs/GroundTruth_Splice-128.mrc") as m:
+            volume_path = os.path.join(os.getcwd(), "figs/GroundTruth_Splice-128.mrc")
+            with mrcfile.open(volume_path) as m:
                 vol = torch.Tensor(m.data.copy()) / 1e6
                 
 
@@ -144,7 +147,7 @@ def init_gt_generator(config):
         if config.gt_side_len != vol.shape[-1]:
             vol = downsample_fourier_crop_3D(vol.to(config.device), size=config.gt_side_len)
             
-            name="/sdf/home/h/hgupta/ondemand/XFELPoseGAN/figs/GroundTruth_"+config.protein+"_"+str(config.gt_side_len)+".mrc"
+            name=os.getcwd()+"/figs/GroundTruth_"+config.protein+"_"+str(config.gt_side_len)+".mrc"
             with mrcfile.new(name, overwrite=True) as m:
                 m.set_data(vol.cpu().numpy())
 

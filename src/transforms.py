@@ -2,6 +2,10 @@ import torch
 from pytorch3d.transforms import matrix_to_euler_angles, euler_angles_to_matrix
 import numpy as np
 
+def add_poisson(image):
+    total=torch.poisson(image)
+    noise=total.data-image.data
+    return noise+image
 
 def rotmat_pi_added(rotmat):
     eulers = matrix_to_euler_angles(rotmat, convention="ZYZ")
