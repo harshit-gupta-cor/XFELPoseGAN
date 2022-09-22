@@ -14,13 +14,16 @@ It can be run using
 
 python main.py config_path configs/xfel_splice_simulated_poses_supervised_multires.yaml
 
+There are two ways to install dependecies:
+1. Use the singularity image /sdf/group/ml/CryoNet/singularity_images/cryonettorch-atomic-primal_latest.sif or
+2. Install conda envoronment using
+   conda env create --file environment.yml
+   conda activate xfel 
 
-It uses the singularity image /sdf/group/ml/CryoNet/singularity_images/cryonettorch-atomic-primal_latest.sif
 
-The tensorboard log files are saved in the folder /logs/. This tensorboard log files can be accessed by 
-
-singularity exec -B /sdf --nv /sdf/group/ml/CryoNet/singularity_images/cryonettorch-atomic-primal_latest.sif tensorboard --logdir="path_to_logs_folder"
-
+The tensorboard log files are saved in the folder /logs/. This tensorboard log files can be accessed by
+1. singularity exec -B /sdf --nv /sdf/group/ml/CryoNet/singularity_images/cryonettorch-atomic-primal_latest.sif tensorboard --logdir="path_to_logs_folder"
+2. or by simply launching tensorboard if you have access to it.
 
 The main file first generates data (if the data already doesn't exist for this configuration).
 It then launches the wrapper object called SupervisedXFELwrapper in wrapper.py which runs the algorithm.
