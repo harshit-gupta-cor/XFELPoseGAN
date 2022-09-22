@@ -1,0 +1,21 @@
+name: xfel
+channels:
+  - conda-forge
+  - defaults
+  - pytorch3d
+dependencies:
+  - codecov
+  - configparser
+  - coverage
+  - h5py
+  - mdtraj
+  - mrcfile
+  - numba
+  - numpy
+  - pip
+  - pyfftw
+  - pytest
+  - pytest-cov
+  - pytorch=1.9.0
+  - pytorch3d
+
