@@ -101,7 +101,7 @@ class SupervisedXFELposeganWrapper():
 
 
 
-                if iteration==(self.config.cryogan_iteration+1) and self.config.use_3d_volume_encoder:
+                if iteration==(self.config.gan_iteration+1) and self.config.use_3d_volume_encoder:
                     self.xfelposegan.encoder.projection_images= fake_data["clean"].data.squeeze()[None, :, :, :]
                     self.xfelposegan.encoder.projection_images.to(self.config.device)
 
@@ -158,7 +158,7 @@ class SupervisedXFELposeganWrapper():
 
                 end_computation_time=time.time()
 
-                if self.xfelposegan.config.cryogan:
+                if self.xfelposegan.config.gan:
                     self.scheduler_dis.step()
                     self.scheduler_gen.step()
                 if self.xfelposegan.config.supervised_loss:
@@ -176,7 +176,7 @@ class SupervisedXFELposeganWrapper():
 
                 alpha_local=self.meta_scheduler_dict["alpha_array"][iteration]
                 scale_local =self.meta_scheduler_dict["scale_array"][iteration]
-                key=[keys for keys, val in self.meta_scheduler_dict.items() if keys in ["cryogan_bool","supervised_bool", "tomo_bool" ] and val[iteration]>0 ]
+                key=[keys for keys, val in self.meta_scheduler_dict.items() if keys in ["gan_bool","supervised_bool", "tomo_bool" ] and val[iteration]>0 ]
                 print(f"iter: {iteration} algo: {key} scale: {scale_local} alpha:{ alpha_local}")
 
                 summary_time=0
@@ -244,7 +244,7 @@ class SupervisedXFELposeganWrapper():
 
 
     def assign_bool_iteration(self, iteration):
-        self.xfelposegan.config.cryogan=self.meta_scheduler_dict["cryogan_bool"][iteration]
+        self.xfelposegan.config.gan=self.meta_scheduler_dict["gan_bool"][iteration]
         self.xfelposegan.config.supervised_loss=self.meta_scheduler_dict["supervised_bool"][iteration]
         self.xfelposegan.config.tomography=self.meta_scheduler_dict["tomo_bool"][iteration]
 
@@ -260,7 +260,7 @@ class SupervisedXFELposeganWrapper():
     def meta_bools(self):
 
         cumulative_iteration = np.zeros((len(self.config.scale), 2))
-        local_iteration = self.config.cryogan_iteration
+        local_iteration = self.config.gan_iteration
 
         for i in range(len(self.config.scale)):
             local_iteration += self.config.sup_iteration_scale[i]
@@ -280,7 +280,7 @@ class SupervisedXFELposeganWrapper():
         total=0
         for iteration in range(max_iter):
 
-            if iteration < self.config.cryogan_iteration:
+            if iteration < self.config.gan_iteration:
                 xfelgan_bool[iteration] = 1
                 scale_array[iteration] = self.config.scale[0]
             else:
@@ -310,7 +310,7 @@ class SupervisedXFELposeganWrapper():
 
 
         self.meta_scheduler_dict=({"supervised_bool" : supervised_bool,
-                                    "cryogan_bool" : xfelgan_bool,
+                                    "gan_bool" : xfelgan_bool,
                                     "tomo_bool" : tomo_bool,
                                     "scale_array" : scale_array,
                                     "alpha_array" : alpha_array,

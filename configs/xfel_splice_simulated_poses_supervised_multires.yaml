@@ -1,11 +1,12 @@
   #dataset:
-    exp_name: xray_ewald #experiment name
+    exp_name: xray_big_square_mask_poisson_ewald_trial #experiment name
+    noise_type: poisson
     ewald_radius: 10000 #ewald sphere radius, the higher the radius lower the curvature.
     simulated: True # simulated data
     algotype: train #training paradigm always true
     device: "cuda:0" # device
     datasetsize: 41000 # size of data
-    snr_val: 20   #snr of the data generated
+    snr_val: -9   #snr of the data generated
     lambdapenalty: 0.001 #discirimnator gradient penalty weight
     init_with_gt: False  # initialize the reconstruction with gt
     down_res_in_pixel: 2   # down sampling of the gt if init is true
@@ -17,7 +18,7 @@
     #multires:
     multires: True    # multiresolution strategy
 
-    cryogan_iteration: 5000   # number of iteration of gan
+    gan_iteration: 5000   # number of iteration of gan
     scale: [5]    #scale at which reconstruct the structure 2**scale = number of voxels in the volume
     sup_iteration_scale: [2000 ] # number of iteration (supervision step) to train the encoder on fake data after GAN has finished
     tomo_iteration_scale: [2000] # number of iteration (tomographic step) to reconstruct the 3D structure using poses extracted by launching trained encoder on real data.
@@ -60,10 +61,10 @@
 
 
   #projector
-    gt_side_len: 32 # pixel number in gt
-    rec_side_len: 32  # pixel number in reconstruction projection
-    ProjectionSize: 32 # pixel number in reconstruction projection (has to be kept same as rec_side_len)
-    map_shape: 32  # pixel number in reconstruction projection (has to be kept same as rec_side_len)
+    gt_side_len: 128 # pixel number in gt
+    rec_side_len: 128  # pixel number in reconstruction projection
+    ProjectionSize: 128 # pixel number in reconstruction projection (has to be kept same as rec_side_len)
+    map_shape: 128  # pixel number in reconstruction projection (has to be kept same as rec_side_len)
     batch_size: 32 # size of batch
     noise: True # addition of noise in real and fake data. For fake data the level of noise is learnt by gan.
     weight_gen: 1

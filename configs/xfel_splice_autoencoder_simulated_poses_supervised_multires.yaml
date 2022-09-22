@@ -16,7 +16,7 @@
     #multires:
     multires: True
 
-    cryogan_iteration: 0
+    gan_iteration: 0
     scale: [5]
     sup_iteration_scale: [0 ]
     tomo_iteration_scale: [20000]

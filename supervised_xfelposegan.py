@@ -6,7 +6,7 @@ from pytorch3d.transforms import random_rotations, rotation_6d_to_matrix, so3_re
 from modules import  Discriminator, Encoder, weights_init, RotDiscriminator
 from writer_utils import writer_image_add_dict, writer_update_weight, dict_from_dis, dict_from_gen, norm_of_weights, writer_scalar_add_dict
 from loss_utils import calculate_loss_dis, calculate_loss_supervised, calculate_loss_unsupervised, calculate_loss_tomography, dict_to_loss, dict_to_loss_dis, calculate_loss_gan_gen, calculate_loss_mean_std
-from utils import get_samps_simulator, cryoposenet_weight_scheduler
+from utils import get_samps_simulator, posenet_weight_scheduler
 from src.simulator_utils import LinearSimulator, XFELSimulator, DenoiseSimulator
 from src.summary_functions import write_euler_histogram
 from src.plot3d_utils import align_rotmat
@@ -123,19 +123,19 @@ class XFELPoseGAN(nn.Module):
         loss_dict={}
 
         
-        weight_dict_gen={"weight_loss_gan_gen":1* self.config.cryogan}
-        weight_dict_mean_std={"weight_loss_mean_std":1* self.config.cryogan*self.config.weigt_loss_mean_std}
-        weight_dict_dis={"weight_loss_dis":1* self.config.cryogan}
+        weight_dict_gen={"weight_loss_gan_gen":1* self.config.gan}
+        weight_dict_mean_std={"weight_loss_mean_std":1* self.config.gan*self.config.weigt_loss_mean_std}
+        weight_dict_dis={"weight_loss_dis":1* self.config.gan}
          
         weight_dict_supervised={"weight_loss_supervised":1*self.config.supervised_loss }
         weight_dict_tomography={"weight_loss_tomography":1 * self.config.tomography}
      
 
 
-        if self.config.cryogan:
+        if self.config.gan:
             
             
-            start_cryogan=time.time()
+            start_gan=time.time()
             start_gen_forward=time.time()
             
             if "conditional_gan" in self.config.exp_name:
@@ -190,9 +190,9 @@ class XFELPoseGAN(nn.Module):
 
                 loss_dict.update(**loss_gen_dict)
 
-            end_cryogan=time.time()
+            end_gan=time.time()
             
-            complete_time=end_cryogan-start_cryogan
+            complete_time=end_gan-start_gan
             dis_forward_time=end_dis_forward-start_dis_forward
             dis_backward_time=end_dis_backward-start_dis_backward
             gen_forward_time=end_gen_forward-start_gen_forward
@@ -215,7 +215,7 @@ class XFELPoseGAN(nn.Module):
             fake_data=self.get_fake_data(params)
                         
             if self.config.progressive_supervision:
-                ratio=float(iteration-self.config.cryogan_iteration)/float(self.config.supervised_loss_iteration)
+                ratio=float(iteration-self.config.gan_iteration)/float(self.config.supervised_loss_iteration)
                 alpha_min=np.max((0.0, ratio-0.1))
                 alpha=np.min((1.0, alpha_min/0.9))
               
