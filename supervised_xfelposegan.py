@@ -6,7 +6,7 @@ from pytorch3d.transforms import random_rotations, rotation_6d_to_matrix, so3_re
 from modules import  Discriminator, Encoder, weights_init, RotDiscriminator
 from writer_utils import writer_image_add_dict, writer_update_weight, dict_from_dis, dict_from_gen, norm_of_weights, writer_scalar_add_dict
 from loss_utils import calculate_loss_dis, calculate_loss_supervised, calculate_loss_unsupervised, calculate_loss_tomography, dict_to_loss, dict_to_loss_dis, calculate_loss_gan_gen, calculate_loss_mean_std
-from utils import get_samps_simulator, posenet_weight_scheduler
+from utils import get_samps_simulator
 from src.simulator_utils import LinearSimulator, XFELSimulator, DenoiseSimulator
 from src.summary_functions import write_euler_histogram
 from src.plot3d_utils import align_rotmat

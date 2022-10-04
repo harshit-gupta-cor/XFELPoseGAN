@@ -180,7 +180,7 @@ class SupervisedXFELposeganWrapper():
                 print(f"iter: {iteration} algo: {key} scale: {scale_local} alpha:{ alpha_local}")
 
                 summary_time=0
-                summary_iteration_number=499
+                summary_iteration_number=49
                 if ((iteration+1)%summary_iteration_number==0 ) or (iteration==0):
                     start_summary_time=time.time()
                     volume_dict ={"gt":self.gt_loader.make_vol().cpu(),

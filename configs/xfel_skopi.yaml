@@ -1,11 +1,11 @@
   #dataset:
-    exp_name: xray_big_square_mask_poisson_ewald_trial #experiment name
-    noise_type: poisson
+    exp_name: xfel_skopi_small_3d_radius #experiment name
+    noise_type: gaussian
     ewald_radius: 10000 #ewald sphere radius, the higher the radius lower the curvature.
     simulated: True # simulated data
     algotype: train #training paradigm always true
     device: "cuda:0" # device
-    datasetsize: 41000 # size of data
+    datasetsize: 7000 # size of data
     snr_val: -8   #snr of the data generated
     lambdapenalty: 0.001 #discirimnator gradient penalty weight
     init_with_gt: False  # initialize the reconstruction with gt
@@ -56,7 +56,7 @@
   #constraint
     positivity: True # volume is enforced to be non-negative
     mask_3d: True   # 3D sphere mask
-    mask_3d_diameter: 0.9 # diameter of the 3D sphere mask centered at volume center
+    mask_3d_diameter: 0.5 # diameter of the 3D sphere mask centered at volume center
     mask_2d: False # 2D mask on the projections generated
 
 

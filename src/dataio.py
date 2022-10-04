@@ -75,10 +75,14 @@ def dataloader( config):
             data_loader=  SimulatedXFELDataLoader(config)
             dataset=data_loader
             noise_loader=SimulatedXFELDataLoader(config, fake_params=True)
-        elif hasattr(config, "cryo") and config.noise_type=="cryo":
-            data_loader=SimulatedDataLoader(config)
-            dataset=data_loader
-            noise_loader=SimulatedDataLoader(config, fake_params=True)
+
+        if "skopi" in config.exp_name:
+            data_loader = skopiDataLoader(config)
+            dataset = data_loader
+            noise_loader = SimulatedXFELDataLoader(config, fake_params=True)
+
+
+
         else:
             data_loader=SimulatedDataLoader(config)
             dataset=data_loader
@@ -184,6 +188,41 @@ class SavedDataLoader(Dataset):
         indices=np.random.randint(0, self.__len__(), self.config.batch_size)
         output_dict["proj"]= torch.from_numpy(self.mrcs.data[indices])
         output_dict["rotmat"]=self.rotmat.data[indices]
+        return output_dict
+
+    def __iter__(self):
+        return self
+
+
+
+
+class skopiDataLoader(Dataset):
+    def __init__(self, config, fake_params=False):
+        self.config = config
+
+        self.counter = 0
+        self.dictionary = {}
+
+        dataset_name = self.config.protein + "_snr_" + str(self.config.snr_val) + "_projsize_" + str(
+            self.config.gt_side_len)
+        self.mrc_path = "./figs/" + "skopi_dataset.mrcs"
+        self.mrcs = mrcfile.mmap(self.mrc_path)
+        self.rotmat = torch.randn(self.mrcs.data.shape[0], 3,3)
+
+    def make_vol(self):
+        if not hasattr(self, "vol"):
+            self.vol = torch.randn(128,128,128)
+        return self.vol.to(self.config.device)
+
+    def __len__(self):
+        return self.config.datasetsize // self.config.batch_size
+
+    def __next__(self):
+        self.counter += 1
+        output_dict = {}
+        indices = np.random.randint(0, self.__len__(), self.config.batch_size)
+        output_dict["proj"] = fourier_to_primal_2D(torch.from_numpy(self.mrcs.data[indices])).real
+        output_dict["rotmat"] = self.rotmat.data[indices]
         return output_dict
 
     def __iter__(self):
