@@ -17,7 +17,9 @@ python main.py config_path configs/xfel_splice_simulated_poses_supervised_multir
 There are two ways to install dependecies:
 1. Use the singularity image /sdf/group/ml/CryoNet/singularity_images/cryonettorch-atomic-primal_latest.sif or
 2. Install conda envoronment using
+
    conda env create --file environment.yml
+   
    conda activate xfel 
 
 
