@@ -1,16 +1,13 @@
 # XFELPoseGAN
 
+The jupyter notebook xfel_colab.ipynb contains commands to run the program on google colab.
 
 This projects run XFEL pose GAN. The algorithms runs a multiresolution method to reconstruct the 3D structure of protein from its XFEL image.
 It uses the config file in yaml format for the input parameters.
 
+First download 3D structure of splice protein from https://drive.google.com/file/d/1FTEGj-6mNRpC4O3j5GFJNPHPJbScf8jB/view into ./figs folder. If the figs folder is not there, then create it.
 
-First download figs folder from 
-https://slac-my.sharepoint.com/:f:/g/personal/hgupta_slac_stanford_edu/Eggp0uw8v-1FuYUEvZWbTYYBCmO8q5o1LlEH3pLGZHW4lA?e=SgAcX9
-
-This folder contains the 3D volumes from which simulated data is generated. Keep the folder as figs/ in XFELPoseGAN folder
-
-It can be run using
+The method can be run using
 
 python main.py config_path configs/xfel_splice_simulated_poses_supervised_multires.yaml
 
