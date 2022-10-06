@@ -115,7 +115,10 @@ class SupervisedXFELposeganWrapper():
                 if not self.xfelposegan.config.supervised_loss:
 
                     gt_data = next(self.gt_loader)
-                    gt_data = dict2cuda(gt_data, verbose=iteration==0)
+                    if "cuda" in self.config.device:
+                      gt_data = dict2cuda(gt_data, verbose=iteration==0)
+                 
+
                     gt_data = downsample_dict(gt_data, scale)
 
                 else:
@@ -123,7 +126,8 @@ class SupervisedXFELposeganWrapper():
                 if not self.xfelposegan.config.tomography:
 
                     fake_params = next(self.noise_loader)
-                    fake_params = dict2cuda(fake_params, verbose=iteration==0)
+                    if "cuda" in self.config.device:
+                      fake_params = dict2cuda(fake_params, verbose=iteration==0)
                     fake_params = downsample_dict(fake_params, scale)
 
                 else:
@@ -180,7 +184,7 @@ class SupervisedXFELposeganWrapper():
                 print(f"iter: {iteration} algo: {key} scale: {scale_local} alpha:{ alpha_local}")
 
                 summary_time=0
-                summary_iteration_number=49
+                summary_iteration_number=499
                 if ((iteration+1)%summary_iteration_number==0 ) or (iteration==0):
                     start_summary_time=time.time()
                     volume_dict ={"gt":self.gt_loader.make_vol().cpu(),
