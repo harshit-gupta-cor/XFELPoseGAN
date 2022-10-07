@@ -76,7 +76,7 @@ def dataloader( config):
             dataset=data_loader
             noise_loader=SimulatedXFELDataLoader(config, fake_params=True)
 
-        if "skopi" in config.exp_name:
+        if "skopi" in config.exp_name:#if skopi in exp name use this loader
             data_loader = skopiDataLoader(config)
             dataset = data_loader
             noise_loader = SimulatedXFELDataLoader(config, fake_params=True)
@@ -119,6 +119,8 @@ def rotmat_generator(num, config):
 #         else:
         rotmat=random_rotations(num)
         return rotmat
+
+
 
 def init_gt_generator(config):
         L = config.side_len
@@ -232,6 +234,11 @@ class skopiDataLoader(Dataset):
 
 
 class SimulatedDataLoader(Dataset):
+    """
+    Dataloader which generates on the fly ground truth data.
+    If fake_params is true then generates fake parameters which are used by GAN to
+    generate fake data.
+    """
     def __init__(self, config, fake_params=False):
         self.config=config
         self.fake_params=fake_params
@@ -249,6 +256,7 @@ class SimulatedDataLoader(Dataset):
                 self.sim.projector.vol[:, :, :]=vol
 
                 if "autocorr" in self.config.exp_name:
+                    #volume to its autocorrelation
                     self.sim.projector.vol.data=vol_to_autocorr(self.sim.projector.vol.data)
                 elif "ewald" in self.config.exp_name:
                     print("here")
@@ -319,6 +327,8 @@ class SimulatedDataLoader(Dataset):
         
         
     def snr_specifier(self):
+        # changes value of the scalar in projector to change the SNR of ground truth data being generated.
+        # The SNR is an input variable to the algorithm.
         save_mode=self.config.normalize_gt
         self.config.normalize_gt=False
 
