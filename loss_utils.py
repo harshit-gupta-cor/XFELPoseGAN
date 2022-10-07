@@ -7,6 +7,16 @@ from src.transforms import  rotmat_pi_added
 
 
 def pairwise_cos_sim(x):
+    """
+
+    Parameters
+    ----------
+    x: input tensor
+
+    Returns
+    -------
+    pairwise_sim: pairwise cosine similarity of a tensor elements.
+    """
     x_norm = torch.nn.functional.normalize(x, p=2, dim=-1)  # --> B,(6/3)
     # multiply row i with row j using transpose
     # element wise product
@@ -15,6 +25,17 @@ def pairwise_cos_sim(x):
     return pairwise_sim
 
 def contrastive_loss(rotmat):
+    """
+
+    Parameters
+    ----------
+    rotmat: batch_sizex3x3
+
+    Returns
+    -------
+    loss: contrastive loss
+
+    """
     flat_rotmat=rotmat.flatten(1)
     batch_sz=flat_rotmat.shape[0]
     latent_loss = (pairwise_cos_sim(flat_rotmat) - torch.eye(batch_sz).cuda()) ** 2
@@ -37,6 +58,8 @@ def select_min_rotmat(rotmat_true, rotmat_pred):
 
 
 def select_min_rotmat_tomography(image_true, image_pred, rotmat_true, rotmat_pred):
+    #Selects min  among n-th and (n+batch_size)-th error
+    #input 2Bx3x3  output--> Bx3x3
 
     error_full = (image_true - image_pred).detach().flatten(1).pow(2).sum(1)[:,None]
     error = torch.cat([error_full[:len(image_true) // 2, :], error_full[len(image_true) // 2:, :]], 1)
@@ -55,6 +78,22 @@ def select_min_rotmat_tomography(image_true, image_pred, rotmat_true, rotmat_pre
 
 
 def calculate_loss_dis(dis, real_data, fake_data, config):
+    """
+
+    Parameters
+    ----------
+    dis: discriminator
+    real_data
+    fake_data
+    config
+
+    Returns
+    -------
+    loss_dict: contains
+    loss_dis= Dis(real)-Dis(fake)+gradient_penalty (search WGAN gradient penalty for more details)
+    loss_wass=Dis(real)-Dis(fake)
+    loss_gp=gradient_penalty
+    """
     fake_samps=fake_data["proj"].detach()
     real_samps=real_data["proj"]
 
@@ -76,6 +115,21 @@ def calculate_loss_dis(dis, real_data, fake_data, config):
     return loss_dict
 
 def calculate_loss_gan_gen( dis, real_data, fake_data, config):
+    """
+
+       Parameters
+       ----------
+       dis: discriminator
+       real_data
+       fake_data
+       config
+
+       Returns
+       -------
+       loss_dict: contains
+       loss_gan_gen= Dis(fake)
+
+    """
     loss_dict={}
     
     fake_samps=fake_data["proj"]
@@ -104,6 +158,23 @@ def calculate_loss_mean_std(real_data, fake_data):
     return loss_dict
 
 def calculate_loss_supervised( encoder, gen, real_data, fake_data, alpha, config):
+    """
+
+    Parameters
+    ----------
+    encoder
+    gen
+    real_data
+    fake_data
+    alpha
+    config
+
+    Returns
+    -------
+    loss_pose_fake: L2 norm of the difference between pose predicted by encoder for the fake data and the true
+                    poses used to generate the fake data. Poses are parameterized using rotation matrices.
+    loss_rel_angle_fake: Same as loss_pose_fake but in SO3 pose space.
+    """
    
     identity=torch.eye(3,3).to(config.device)
     rotmat_true = fake_data["rotmat"]
@@ -133,6 +204,25 @@ def calculate_loss_supervised( encoder, gen, real_data, fake_data, alpha, config
     return rotmat_true, rotmat_pred_fake, loss_dict
 
 def calculate_loss_tomography(encoder, gen, real_data, config):
+    """
+
+    Parameters
+    ----------
+    encoder
+    gen
+    real_data
+    config
+
+    Returns
+    -------
+    rotmat_true_real: True rotmatrix for ground truth data (also called real)
+    rotmat_pred_real: predicted rotmatrix for ground truth data (also called real)
+    rec_data: Data reconstructed using predicted rot matrix
+    loss_dict: Dictionary containing loss variables as following
+        loss_tomography: L2 norm between true real image and predicted image.
+
+
+    """
     loss_dict={}
     rotmat_true_real=real_data["rotmat"] if "rotmat" in real_data else None
     if rotmat_true_real is not None and config.symmetrized_loss_tomo:
@@ -166,6 +256,21 @@ def calculate_loss_tomography(encoder, gen, real_data, config):
     
     
 def calculate_loss_unsupervised( dis, encoder, gen, real_data, fake_data, config):
+    """
+
+    Parameters
+    ----------
+    dis
+    encoder
+    gen
+    real_data
+    fake_data
+    config
+
+    Returns
+    -------
+    loss_dict: dictionary containing loss values from various unsupervised approaches.
+    """
     loss_dict={}
     rec_data=None
     
@@ -204,6 +309,18 @@ def dict_to_loss_dis(loss_dict, weight_dict):
     return loss_dict["loss_dis"]
 
 def dict_to_loss(loss_dict, weight_dict):
+    """
+
+    Parameters
+    ----------
+    loss_dict: dict containing loss values
+    weight_dict: dict containg weight for each loss value
+
+    Returns
+    -------
+    summation of the weighted loss.
+
+    """
     loss=0
     weight_total=0
     for keys in weight_dict:
