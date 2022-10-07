@@ -12,8 +12,15 @@ from src.summary_functions import write_euler_histogram
 from src.plot3d_utils import align_rotmat
 import time
 class XFELPoseGAN(nn.Module):
+    """
+    This object initializes all the modules and
+    contains access to all the sub methods need to run the XFELposeGAN algorithm.
+    """
     def __init__(self, config):
         super(XFELPoseGAN, self).__init__()
+        """
+        Initialize the config and time variables.
+        """
         self.config = config
         self.max_rel_angle=0
         self.save_itr=0
@@ -31,6 +38,10 @@ class XFELPoseGAN(nn.Module):
                          "tomo/total_backward":0})
                          
     def init_dis(self):
+        """
+        Initialize the discriminator architecture and optimizer.
+
+        """
 
         self.dis = Discriminator(self.config)
         if not self.config.encoder_equalized_lr:
@@ -42,6 +53,10 @@ class XFELPoseGAN(nn.Module):
                                           weight_decay=self.config.dis_weight_decay)
 
     def init_gen(self):
+        """
+        Initialize the generator components like simulator and scalar (noise level estimator) and optimizer.
+
+        """
         self.config.side_len=self.config.rec_side_len
         
 
@@ -69,6 +84,10 @@ class XFELPoseGAN(nn.Module):
 
        
     def init_encoder(self):
+        """
+        Initialize the encoder architecture and optimizer.
+
+        """
 
         self.encoder = Encoder(self.config)
         if not self.config.encoder_equalized_lr:
@@ -81,6 +100,18 @@ class XFELPoseGAN(nn.Module):
 
 
     def get_fake_data(self, params):
+        """
+
+        Parameters
+        ----------
+        params: dictionary containing parameters of the fake data like rotation matrices.
+                The parameters are used by the generator to create fake data.
+
+        Returns
+        -------
+        fake_data: dictionary containing fake data (including images and the rotation matrices associated)
+
+        """
         save_fake_data=False
         if save_fake_data:
             self.save_itr+=1
@@ -116,6 +147,30 @@ class XFELPoseGAN(nn.Module):
 
 
     def train(self, real_data, params, max_iter, iteration, writer, train_all=True):
+        """
+        Runs the corresponding method depending on the value of
+        self.config.gan
+        self.config.supervised_loss
+        self.config.tomography
+
+        For each method calls the forward, loss functions, backpropagation, and registers the time taken.
+
+        Parameters
+        ----------
+        real_data: ground truth data with images and rotation matrices (if simulated data).
+        params: params to create fake data.
+        max_iter: maximum number of iterations.
+        iteration: current iteration number.
+        writer: tensorboard writer.
+        train_all: bool which specifies if the generator needs to be backprogable at a given iteration.
+
+        Returns
+        -------
+        loss_dict: dictionary containing values of all the loss functions estimated at the current iteration.
+        rec_data: dictionary containing data reconstructed from the tomography step. None if tomography method is not called.
+        fake_data: dictionary containing data reconstructed from the gan step. None if gan method is not called.
+        writer: tensorboard writer.
+        """
         
         config=self.config
         rec_data=None
@@ -340,25 +395,35 @@ class XFELPoseGAN(nn.Module):
         self.dis_optim.step()
 
         
-    def zero_grad(self):   
-            self.dis_optim.zero_grad()
-            self.gen_optim.zero_grad()
-            self.encoder_optim.zero_grad()
-            self.scalar_optim.zero_grad()
+    def zero_grad(self):
+        """
+        Zeros the gradient after backpropogration for tensors.
+
+        """
+        self.dis_optim.zero_grad()
+        self.gen_optim.zero_grad()
+        self.encoder_optim.zero_grad()
+        self.scalar_optim.zero_grad()
         
 
 
     def train_gen(self):
+        """
+        Optimizer step for generator
+        """
     
-            if self.config.gen_clip_grad == True:
-                torch.nn.utils.clip_grad_norm_(self.gen.projector.parameters(), max_norm=self.config.gen_clip_norm_value)
-                torch.nn.utils.clip_grad_norm_(self.gen.proj_scalar, max_norm=self.config.scalar_clip_norm_value)
+        if self.config.gen_clip_grad == True:
+            torch.nn.utils.clip_grad_norm_(self.gen.projector.parameters(), max_norm=self.config.gen_clip_norm_value)
+            torch.nn.utils.clip_grad_norm_(self.gen.proj_scalar, max_norm=self.config.scalar_clip_norm_value)
 
 
-            self.gen_optim.step()
-            self.constraint()
+        self.gen_optim.step()
+        self.constraint()
             
     def train_scalar(self):
+        """
+        Optimizer step for scalar (noise level estimator)
+        """
         if self.config.scalar_clip_grad == True:
                 torch.nn.utils.clip_grad_norm_(self.gen.scalar, max_norm=self.config.scalar_clip_norm_value)
                 
@@ -368,14 +433,21 @@ class XFELPoseGAN(nn.Module):
         
 
     def train_enc(self):
+        """
+        Optimizer step for encoder.
+        """
 
-            if self.config.encoder_clip_grad == True:
-                torch.nn.utils.clip_grad_norm_(self.encoder.parameters(), max_norm=self.config.encoder_clip_norm_value)
-            self.encoder_optim.step()
+        if self.config.encoder_clip_grad == True:
+            torch.nn.utils.clip_grad_norm_(self.encoder.parameters(), max_norm=self.config.encoder_clip_norm_value)
+        self.encoder_optim.step()
 
 
     def constraint(self):
-            self.gen.projector.constraint()
+        """
+        enforces the constraints on the projector.
+        """
+
+        self.gen.projector.constraint()
 
 
     

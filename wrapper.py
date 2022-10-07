@@ -7,24 +7,30 @@ import numpy as np
 from torch.utils.tensorboard import SummaryWriter
 import torch
 from utils import mean_snr_calculator, dict2cuda,  Dict_to_Obj, downsample_dict
-import pytorch3d
-from pytorch3d.transforms import so3_relative_angle
 from writer_utils import writer_image_add_dict, writer_scalar_add_dict
 from src.dataio import dataloader
 from src.transforms import downsample_avgpool, downsample_avgpool_3D,downsample_fourier_crop_3D
 from src.summary_functions import write_summary
 import time
-from torch.profiler import profile, record_function, ProfilerActivity
+
 
 
 
 
 class SupervisedXFELposeganWrapper():
+    """
+    This object contains the warpper for the xfel pose gan method.
+    It runs GANs, supervised encoder learning, and tomography reconstruction in sequence.
+    The images and other data are saved after a specified number of iterations.
+    """
     def __init__(self, config):
         super(SupervisedXFELposeganWrapper, self).__init__()
+        """
+        Initialize the xfelposegan object, scheduler, and dataloader 
+        """
 
         self.config = config
-
+        #New copy of config to detach it from config for reconstruction
         config_dataio=Dict_to_Obj(config.copy())
         config_dataio.multires=False
         print(f"batchsize for dataio {config_dataio.batch_size}")
@@ -41,7 +47,7 @@ class SupervisedXFELposeganWrapper():
         print(self.xfelposegan.encoder)
         print(self.xfelposegan.dis)
         self.xfelposegan.to(self.config.device)
-        #New copy of config to detach it from config for reconstruction
+
 
         self.init_scheduler(self.xfelposegan)
         self.init_path()
@@ -63,12 +69,21 @@ class SupervisedXFELposeganWrapper():
             self.xfelposegan.gen.proj_scalar.data=self.gt_loader.sim.proj_scalar.clone()
 
     def run(self):
+        """
+        Run the main algorithm. At each iteration the function self.assign_bool_iteration
+        is called which specifies the state of the current epoch. These states are saved by
+        making only one of the following true:
+
+        self.xfelposegan.config.gan
+        self.xfelposegan.config.supervised_loss
+        self.xfelposegan.config.tomography
+
+        The figures and files after 'summary_iteration_number' iterations are saved.
+        """
 
 
         max_iter = self.meta_bools()
 
-
-        #self.write_meta_bools(max_iter)
 
         per_epoch_iteration=len(self.gt_loader)
         total_epochs=int(np.max((max_iter//per_epoch_iteration, 1)))
@@ -185,6 +200,7 @@ class SupervisedXFELposeganWrapper():
 
                 summary_time=0
                 summary_iteration_number=499
+
                 if ((iteration+1)%summary_iteration_number==0 ) or (iteration==0):
                     start_summary_time=time.time()
                     volume_dict ={"gt":self.gt_loader.make_vol().cpu(),
@@ -214,9 +230,6 @@ class SupervisedXFELposeganWrapper():
                     summary_time=end_summary_time-start_summary_time
 
 
-
-
-
                     print(f"iter: {iteration}" )#loss_wass: {wass_loss}")
                 total_summary_time+=summary_time
                 times.update({"computation":total_computation_time,
@@ -233,6 +246,10 @@ class SupervisedXFELposeganWrapper():
 
    
     def init_path(self):
+        """
+        Initialize the output path for saving log and fig files.
+
+        """
         for path in ["/logs/", "/figs/"]:
             OUTPUT_PATH = os.getcwd() + path
             if os.path.exists(OUTPUT_PATH) == False:    os.mkdir(OUTPUT_PATH)
@@ -248,6 +265,11 @@ class SupervisedXFELposeganWrapper():
 
 
     def assign_bool_iteration(self, iteration):
+        """
+        Use meta scheduler to assign the state of each iteration and also the scale at
+        which to run encoder and projector. The scale here means the multi resolution scale.
+
+        """
         self.xfelposegan.config.gan=self.meta_scheduler_dict["gan_bool"][iteration]
         self.xfelposegan.config.supervised_loss=self.meta_scheduler_dict["supervised_bool"][iteration]
         self.xfelposegan.config.tomography=self.meta_scheduler_dict["tomo_bool"][iteration]
@@ -262,7 +284,17 @@ class SupervisedXFELposeganWrapper():
 
 
     def meta_bools(self):
+        """
+        Use the following input variables to assign bool vector of length equal to total iteration
+        for each submethods of xfelposegan:
+        self.config.gan_iteration
+        self.config.sup_iteration
+        self.config.tomo_iteration
 
+        Also assign the scale of multiresolution for each iteration.
+        All the bool vectors are assembled in a dictionary called self.meta_scheduler_dict
+
+        """
         cumulative_iteration = np.zeros((len(self.config.scale), 2))
         local_iteration = self.config.gan_iteration
 
@@ -326,6 +358,10 @@ class SupervisedXFELposeganWrapper():
 
 
     def write_meta_bools(self, max_iter):
+        """
+        Loads meta bool variables in the writer.
+
+        """
 
         for local_iter in range(max_iter):
             meta_dict = {}
@@ -334,6 +370,12 @@ class SupervisedXFELposeganWrapper():
             self.writer = writer_scalar_add_dict(self.writer, meta_dict, local_iter, prefix="meta_bools/")
 
     def init_scheduler(self, xfelposegan):
+        """
+        Initialize the scheduler for optimization. This changes the learning rate
+        and other parameters of the optimizer at each iteration.
+
+
+        """
         
         if hasattr(xfelposegan, "dis_optim"):
 
@@ -360,6 +402,20 @@ class SupervisedXFELposeganWrapper():
 #                 self.cryoposegan.gen.projector.vol[:, :, :] = self.GT.vol[:, :, :]
        
     def plot_images(self, gt_data, fake_data, rec_data, iteration):
+        """
+
+        Parameters
+        ----------
+        gt_data: dictionary containing ground truth data like images, rotation matrices (if the data is simulated)
+        fake_data: dictionary containing fake data like images and rotation matrices from the GANs.
+        rec_data: dictionary containing reconstructed data like images and rotation matrices from the tomography and encoder
+        iteration: iteration at which the current algorithm is.
+
+        Returns
+        -------
+        None but saves all the architectures and images in the writing folder.
+
+        """
 
        
         
